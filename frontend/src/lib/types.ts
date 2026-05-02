@@ -1,6 +1,7 @@
 // TypeScript types mirroring the pydantic schemas in backend/app/schemas/.
 
 export type Band = "low" | "medium" | "high" | "critical";
+export type Severity = "low" | "medium" | "high" | "critical";
 
 export interface Owner {
   id: number;
@@ -26,6 +27,8 @@ export interface Vessel {
   last_seen_lat: number | null;
   last_seen_lon: number | null;
   last_seen_at: string | null;
+  score: number | null;
+  band: Band | null;
 }
 
 export interface VesselDetail extends Vessel {
@@ -38,18 +41,37 @@ export interface VesselDetail extends Vessel {
   flag_history: FlagHistoryEntry[];
 }
 
+export interface Evidence {
+  id: number;
+  vessel_imo: string;
+  detector_name: string;
+  title: string;
+  description: string;
+  source_type: "ais" | "sanctions" | "registry" | "satellite" | "port";
+  source_ref: string;
+  start_time: string | null;
+  end_time: string | null;
+  geometry: Record<string, unknown>;
+  severity: Severity;
+  confidence: number;
+  score_contribution: number;
+  analyst_notes: string | null;
+  created_at: string;
+}
+
 export interface ScoreComponent {
   name: string;
   weight: number;
   value: number;
   contribution: number;
-  evidence: Record<string, unknown>;
+  evidence_records: Evidence[];
 }
 
 export interface Score {
   vessel_imo: string;
   score: number;
   band: Band;
+  recommendation: string;
   computed_at: string;
   components: ScoreComponent[];
 }
@@ -73,11 +95,12 @@ export interface OwnershipNetwork {
 }
 
 export interface SAROverlay {
-  image_url: string;
-  bbox: [number, number, number, number]; // [minLon, minLat, maxLon, maxLat]
-  acquired_at: string;
+  image_url: string | null;
+  bbox: [number, number, number, number] | null;
+  acquired_at: string | null;
   ais_position: [number, number] | null;
   sar_position: [number, number] | null;
+  note?: string;
 }
 
 export interface InterdictionBriefOut {

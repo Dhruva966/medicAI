@@ -1,4 +1,11 @@
-"""SQLAlchemy engine, session, and declarative base."""
+"""SQLAlchemy engine, session, and declarative base.
+
+Default DB is SQLite for zero-setup hackathon dev. Set DATABASE_URL to a
+postgres+psycopg dsn (e.g. when running `docker compose up`) to use
+PostgreSQL + PostGIS instead. The application logic is portable; only
+geometry storage upgrades from JSON-blob to native PostGIS Geometry once
+GeoAlchemy2 is wired up (TODO).
+"""
 
 from collections.abc import Iterator
 
@@ -33,6 +40,6 @@ def get_db() -> Iterator[Session]:
 def init_db() -> None:
     """Create all tables. Called from app startup. No migrations for the hackathon."""
     # Import models so they register with Base.metadata before create_all.
-    from app.models import event, score, vessel  # noqa: F401
+    from app.models import event, evidence, score, vessel  # noqa: F401
 
     Base.metadata.create_all(bind=engine)

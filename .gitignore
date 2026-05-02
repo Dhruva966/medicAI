@@ -9,8 +9,7 @@ venv/
 .ruff_cache/
 .mypy_cache/
 
-# uv
-uv.lock
+# uv (uv.lock is committed for reproducibility)
 
 # Environment
 .env

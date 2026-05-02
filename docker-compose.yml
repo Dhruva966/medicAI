@@ -1,0 +1,63 @@
+# Optional production-stack setup. The hackathon scaffold runs against SQLite
+# out of the box and does NOT require Docker. Bring this up only when you're
+# ready to migrate to PostgreSQL + PostGIS.
+#
+# Quickstart:
+#   docker compose up -d postgres
+#   export DATABASE_URL=postgresql+psycopg://shadowfleet:shadowfleet@localhost:5433/shadowfleet
+#   cd backend && uv run python -m app.seed.demo_vessels
+#
+# NEEDS-SETUP-FOR-PRODUCTION:
+#   - Wire GeoAlchemy2 + native PostGIS Geometry types in app/models/evidence.py
+#     once you actually need spatial queries (the JSON-blob fallback works for
+#     v1 and the demo scenario).
+#   - Replace the bind-mount source watchers below with proper layered builds
+#     before deploying anywhere shared.
+
+services:
+  postgres:
+    image: postgis/postgis:16-3.4
+    container_name: shadowfleet-pg
+    environment:
+      POSTGRES_USER: shadowfleet
+      POSTGRES_PASSWORD: shadowfleet
+      POSTGRES_DB: shadowfleet
+    ports:
+      - "5433:5432"
+    volumes:
+      - shadowfleet_pg:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U shadowfleet -d shadowfleet"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # --- Optional service profiles for full-container dev ---
+  # Bring up with `docker compose --profile full up`.
+  backend:
+    profiles: ["full"]
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    environment:
+      DATABASE_URL: postgresql+psycopg://shadowfleet:shadowfleet@postgres:5432/shadowfleet
+      CORS_ORIGINS: http://localhost:5173
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "8000:8000"
+
+  frontend:
+    profiles: ["full"]
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "5173:80"
+    depends_on:
+      - backend
+
+volumes:
+  shadowfleet_pg:

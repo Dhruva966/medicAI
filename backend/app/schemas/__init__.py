@@ -1,6 +1,7 @@
 """Pydantic response/request schemas for the public API."""
 
 from app.schemas.brief import InterdictionBrief
+from app.schemas.evidence import EvidenceOut
 from app.schemas.score import ScoreComponentOut, ScoreOut
 from app.schemas.vessel import (
     FlagHistoryOut,
@@ -18,5 +19,6 @@ __all__ = [
     "OwnershipNetwork",
     "ScoreOut",
     "ScoreComponentOut",
+    "EvidenceOut",
     "InterdictionBrief",
 ]

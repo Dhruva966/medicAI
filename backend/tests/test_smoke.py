@@ -13,14 +13,18 @@ def test_health() -> None:
 
 
 def test_openapi_lists_routers() -> None:
-    """All five domain routers should be mounted."""
+    """All domain routers should be mounted."""
     client = TestClient(app)
     resp = client.get("/openapi.json")
     assert resp.status_code == 200
     paths = resp.json()["paths"]
-    assert "/vessels" in paths
-    assert "/vessels/{imo}" in paths
-    assert "/vessels/{imo}/score" in paths
-    assert "/vessels/{imo}/brief" in paths
-    assert "/vessels/{imo}/network" in paths
-    assert "/vessels/{imo}/sar" in paths
+    for p in (
+        "/vessels",
+        "/vessels/{imo}",
+        "/vessels/{imo}/score",
+        "/vessels/{imo}/brief",
+        "/vessels/{imo}/network",
+        "/vessels/{imo}/sar",
+        "/vessels/{imo}/evidence",
+    ):
+        assert p in paths, f"missing {p}"

@@ -20,47 +20,76 @@ assessment with evidence and recommended next actions.
 - Recommended actions must remain analyst-supportive: `monitor`, `investigate`,
   `sanctions review`, `notify command`. No autonomous enforcement, no
   categorical "illegal vessel" labels.
-- Keep provider integrations (clients/) separate from domain logic
-  (services/, detectors/).
+- Keep provider integrations (`app/clients/`) separate from detection logic
+  (`app/detectors/`) and orchestration (`app/services/`).
 - Write or update tests for every new detector and API feature.
 - Update docs whenever architecture, commands, or behavior change.
 - Make reasonable assumptions and document them. Do not stop the build because
   a real data integration is unavailable — mock it cleanly behind an interface.
 
-## Preferred stack
+## Stack (current vs target)
 
-- Backend: Python 3.11+ + FastAPI
-- Database: PostgreSQL + PostGIS (current scaffold uses SQLite — migrate when
-  geospatial queries arrive)
-- Frontend: React + TypeScript + Vite + MapLibre (current scaffold uses
-  Leaflet — swap when implementing the map)
-- Local dev: Docker Compose (not yet scaffolded — add when introducing
-  Postgres/PostGIS)
-- Backend tests: pytest
-- Frontend tests: Vitest
-- Package mgmt: uv (Python), pnpm (frontend)
+| Layer | Current | Target | Migration trigger |
+|---|---|---|---|
+| Backend | Python 3.11+ + FastAPI | same | — |
+| ORM | SQLAlchemy 2.0 | same | — |
+| Database | SQLite | PostgreSQL + PostGIS | When spatial queries appear (geofence joins, etc.) |
+| Frontend | Vite + React + TS + Tailwind | same | — |
+| Map | Leaflet + CartoDB Dark | MapLibre GL | When WebGL marker styling becomes the bottleneck |
+| LLM | Anthropic SDK (claude-sonnet-4-5) | same | — |
+| Backend tests | pytest | same | — |
+| Frontend tests | TS strict + (Vitest TBD) | Vitest | When component logic gets complex enough to warrant unit tests |
+| Local dev | `uv` + `pnpm` direct | `docker compose --profile full up` | Optional — for parity with prod |
+| Package mgmt | uv (Python), pnpm (JS) | same | — |
 
 ## Repo layout
 
 ```
-backend/         FastAPI app: app/{config,db,main}.py, models, schemas,
-                 routers, services, clients, seed, tests
-frontend/        Vite + React + TS: src/{components,lib,styles}
-docs/            ARCHITECTURE.md, SCORING_RUBRIC.md, DEMO_FLOW.md
-.env.example     in backend/ — every external key the app needs
-Makefile         install, dev, backend, frontend, seed, test
-```
+backend/
+  app/
+    main.py            FastAPI factory, CORS, lifespan
+    config.py          Pydantic-settings (.env)
+    db.py              SQLAlchemy engine + Base + init_db
+    models/            Vessel, Owner, FlagHistory, AISGap, Encounter,
+                       PortCall, STSTransfer, RiskScore, ScoreComponent, Evidence
+    schemas/           Pydantic v2 response/request shapes
+    routers/           vessels, scores, briefs, network, satellite, evidence
+    detectors/         dark_activity, kinematic_anomaly, sts_proximity,
+                       sanctions_match, identity_inconsistency, route_plausibility
+    services/          scoring, brief_generator, network_builder, playbook_matcher
+    clients/           gfw, ofac, copernicus, equasis  (real or fixture-backed)
+    seed/              demo_vessels.py (the demo_shadow_001 scenario)
+  tests/               smoke + full pipeline test
+  pyproject.toml
+  .env.example
+  Dockerfile           production image (used by `docker compose --profile full up`)
 
-Read `docs/ARCHITECTURE.md` for system shape and `docs/SCORING_RUBRIC.md` for
-the rubric. The scaffold leaves every detector / service / external client
-as `raise NotImplementedError` — fill them in incrementally.
+frontend/
+  src/
+    main.tsx, App.tsx
+    components/        Header, VesselList, VesselMap, VesselDetail,
+                       ScoreBreakdown, EvidenceTimeline, OwnershipGraph,
+                       SARViewer, InterdictionBrief, Legend
+    lib/               api.ts, types.ts, score.ts
+    styles/index.css
+  vite.config.ts (proxies /api -> :8000)
+  Dockerfile           multi-stage nginx build
+  nginx.conf
+
+docs/                  ARCHITECTURE, SCORING_RUBRIC, DEMO_FLOW
+docker-compose.yml     postgres+postgis (optional), backend+frontend (full profile)
+Makefile               install, dev, backend, frontend, seed, test
+```
 
 ## Commands
 
-```
+```bash
 # install everything
 cd backend && uv sync
 cd frontend && pnpm install
+
+# seed the demo scenario (58 vessels, 6 detectors, scores precomputed)
+cd backend && uv run python -m app.seed.demo_vessels
 
 # run
 cd backend && uv run uvicorn app.main:app --reload --port 8000
@@ -71,96 +100,88 @@ cd backend && uv run pytest -q
 cd frontend && pnpm typecheck
 ```
 
-## Definition of done (phase-1 MVP)
+## Definition of done (phase-1 MVP — currently met)
 
-- The app boots locally (`uvicorn` + `vite dev` both start cleanly).
-- Demo fixture `demo_shadow_001` loads via `make seed`.
-- `GET /vessels/{imo}/score` returns score + transparent component breakdown.
-- `POST /vessels/{imo}/brief` returns an evidence-backed analyst brief.
-- The UI renders map + vessel detail + score breakdown + brief flow for the
-  selected vessel.
-- Detector unit tests + at least one end-to-end API integration test pass.
-- README and docs explain setup, what is real, what is mocked, and the
-  assumptions made.
+- ✅ App boots locally (uvicorn + vite dev both clean)
+- ✅ Demo fixture `demo_shadow_001` loads via the seed module
+- ✅ `GET /vessels/{imo}/score` returns score + transparent component breakdown
+- ✅ `POST /vessels/{imo}/brief` returns an evidence-backed analyst brief
+- ✅ UI renders map + vessel detail + score breakdown + evidence + network + SAR + brief
+- ✅ Detector + integration tests pass
+- ✅ README and docs explain setup, what is real, what is mocked
 
-## Required detectors
+## Detector contract
 
-Implement under `backend/app/services/` (or split into `backend/app/detectors/`
-when the file gets too long):
+Every detector under `backend/app/detectors/` exports:
 
-- `dark_activity` — extended AIS gaps, especially in known STS zones
-- `kinematic_anomaly` — impossible jumps, implausible speed, teleports
-- `sts_proximity` — low-speed close encounters consistent with ship-to-ship
-  transfer
-- `sanctions_match` — direct OFAC SDN hits + N-hop ownership proximity
-- `identity_inconsistency` — MMSI / IMO / name / call-sign desync between sources
-- `route_plausibility` — stated route inconsistent with port history, draft,
-  or fuel range
+```python
+NAME: str            # rubric component name (e.g. "dark_activity")
+WEIGHT: int          # rubric weight; total across all detectors = RUBRIC_MAX
+def detect(db: Session, vessel: Vessel) -> DetectorResult: ...
+```
 
-All feed into `services/scoring.py` with weighted, configurable contributions
-(see `docs/SCORING_RUBRIC.md`).
+`DetectorResult` carries an aggregated `value` (0..1) and a list of
+`EvidencePayload` records. The scoring engine in `services/scoring.py` walks
+`ALL_DETECTORS`, persists `RiskScore` + `ScoreComponent` + `Evidence`, and
+normalizes the raw total to 0–1000.
 
 ## Evidence object schema
 
 Every detector emits one or more evidence records that an analyst can trace:
 
-```
+```python
 {
-  "id": "...",
-  "vessel_imo": "...",
-  "detector_name": "dark_activity",
-  "title": "11h AIS gap near Lakonikos Gulf STS zone",
-  "description": "...",
+  "id": int,
+  "vessel_imo": str,
+  "detector_name": str,
+  "title": str,                # one short line
+  "description": str,          # one paragraph, evidence-grounded
   "source_type": "ais|sanctions|registry|satellite|port",
-  "source_ref": "gfw://track/123 or ofac://sdn/2024-12-04 etc.",
-  "start_time": "...",
-  "end_time": "...",
-  "geometry": {...},          # GeoJSON
+  "source_ref": str,           # e.g. "ofac://sdn/owner/12", "aisgap://4"
+  "start_time": datetime | None,
+  "end_time": datetime | None,
+  "geometry": dict,            # GeoJSON
   "severity": "low|medium|high|critical",
-  "confidence": 0.0,           # 0..1
-  "score_contribution": 0,     # contributes to RiskScore
-  "analyst_notes": null
+  "confidence": float,         # 0..1
+  "score_contribution": int,
+  "analyst_notes": str | None,
 }
 ```
 
-These should be persisted, returned by the API, and surfaced verbatim in the
-UI so every alert traces back to stored evidence.
+These are persisted, returned by the API at `GET /vessels/{imo}/evidence`,
+and rendered verbatim in the UI Evidence tab so every alert traces back.
 
-## Risk engine requirements
+## Risk engine
 
-- Weighted transparent scoring 0–1000 (see `docs/SCORING_RUBRIC.md`).
-- Weights live in one place and are configurable.
-- Score breakdown returned by API alongside the total.
-- Recommendation derived from score band: `monitor | investigate | sanctions review | notify command`.
+- Six implemented detectors, weights sum to `RUBRIC_MAX = 860`.
+- Total = `round(sum(component contributions) * 1000 / RUBRIC_MAX)`, clamped 0–1000.
+- Bands: low 0–249 · medium 250–549 · high 550–799 · critical 800+
+- Recommendation: `monitor → investigate → sanctions review → notify command`.
 
 ## Demo scenario `demo_shadow_001`
 
-A curated fixture for the demo. Should include:
+Hero vessel: **IMO 9876543 / ATLANTIS PIONEER** under flag Cook Islands. Curated to score in the **critical** band (~819) with five firing detectors:
 
-- A tanker-like vessel with realistic identity.
-- A meaningful AIS dark period (≥6h) overlapping a known STS zone.
-- A plausible suspicious proximity event (low speed, open water, > 1h).
-- A sanctions-or-ownership-risk link via fixture data (shell company two hops
-  from an SDN-listed vessel).
-- A route plausibility problem (port history inconsistent with current course).
-- Enough corroborating evidence to produce a high-band score.
+- 16h AIS dark window inside a known STS-transfer corridor (Arabian Sea)
+- Implied speed > 80 kn across an 18h dark gap (impossible kinematics)
+- 3h open-water encounter with sanctioned sister vessel `KRUSHEVA`
+- Owner chain: Marshall Pacific Holdings (shell) → Hong Kong Pearl Maritime (shell, OFAC SDN) → Sovcomflot OJSC (OFAC SDN)
+- Four flag changes in 12 months ending on a flag of convenience
+
+47 routine vessels and 8 medium-risk vessels round out the map.
 
 ## Data and integration discipline
 
-Use real integrations only where access is immediate and clearly legal:
+| Source | v1 status | Notes |
+|---|---|---|
+| AIS positions / encounters | Seeded fixtures | Real GFW client behind `app/clients/gfw.py`, token-gated |
+| OFAC SDN list | Bundled subset | Replace with public XML feed in `ofac.py` |
+| Equasis ownership / flag history | Read from local DB | Real Equasis is registration-gated |
+| Sentinel-1 SAR | Curated demo overlay | OAuth + scene fetch stubbed in `copernicus.py` |
+| NGA WPI / UN/LOCODE port metadata | Inline subset in `route_plausibility.py` | Bundle full lists when route logic gets richer |
 
-- **AIS:** NOAA AccessAIS archive for fixtures; Global Fishing Watch behind a
-  client interface (token in `.env`).
-- **Sanctions:** OFAC SDN list — ingest the public XML directly.
-- **Registry / ownership:** Equasis is registration-gated; build adapter +
-  mock, do not scrape.
-- **Satellite:** Sentinel-1 SAR / Sentinel-2 optical via Copernicus Data Space —
-  curated demo scenes only in v1.
-- **Night detections:** VIIRS Boat Detection — adapter + mock for v1.
-- **Port metadata:** NGA World Port Index, UN/LOCODE — bundle locally.
-
-Mocked adapters must look identical to real ones from the calling code's
-perspective. Document which providers are real vs simulated in the README.
+Mocked adapters present the same call signatures real ones will. Always
+document which providers are real vs simulated in the README table.
 
 ## Verification
 
@@ -172,5 +193,5 @@ Codex performs better when "done" is concrete. Before declaring a task done:
 4. Summarize: what was implemented, what is mocked, what should be replaced
    with real providers later.
 
-If Codex repeatedly hits the same wrong pattern, run a retrospective and
-update this file rather than re-stating the rule in chat.
+If a recurring wrong pattern shows up, run a retrospective and update this
+file rather than re-stating the rule in chat.

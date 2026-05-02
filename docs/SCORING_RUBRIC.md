@@ -2,44 +2,56 @@
 
 Per-vessel deception score on a **0–1000** scale. Higher = more likely the vessel is misrepresenting itself.
 
-> **Status:** placeholder. Final weights, thresholds, and evidence rules will be tuned during the hackathon.
-
 ## Bands
 
-| Band       | Range     | Meaning                                                                  |
-|------------|-----------|--------------------------------------------------------------------------|
-| `low`      | 0–249     | Behavior consistent with stated identity and route.                      |
-| `medium`   | 250–549   | Some anomalies. Watch.                                                   |
-| `high`     | 550–799   | Multiple deception signals. Flag for sanctions review.                   |
-| `critical` | 800–1000  | Strong deception fingerprint. Recommend interdiction brief immediately.  |
+| Band | Range | Meaning | Recommendation |
+|---|---|---|---|
+| `low` | 0–249 | Behavior consistent with stated identity and route | `monitor` |
+| `medium` | 250–549 | Some anomalies, signal is not yet decisive | `investigate` |
+| `high` | 550–799 | Multiple deception signals, pattern is shadow-fleet-like | `sanctions review` |
+| `critical` | 800–1000 | Strong deception fingerprint across multiple sources | `notify command` |
 
-## Components (placeholder weights)
+## Components (current weights)
 
-| Component             | Weight | Trigger                                                                   |
-|-----------------------|--------|---------------------------------------------------------------------------|
-| `ais_gap`             | 150    | AIS off > 6h, especially in known STS zones or near sanctioned routes.    |
-| `flag_hopping`        | 100    | ≥ 2 flag changes in 12 months, or change to a flag of convenience.        |
-| `ownership_shell`     | 150    | Owner is a shell company tied to previously sanctioned vessels.           |
-| `sts_proximity`       | 150    | Encounter with another vessel in open water > 1h, no port call logged.   |
-| `route_implausible`   | 100    | Stated route inconsistent with port history, draft change, or fuel range. |
-| `sanctions_neighbor`  | 100    | Direct contact (encounter, port co-occurrence) with an SDN-listed vessel. |
-| `identity_mismatch`   | 100    | MMSI / IMO / name / call-sign inconsistencies between sources.            |
-| `sar_visual_mismatch` | 100    | SAR detection in a location where AIS says the vessel was elsewhere.      |
-| `dark_port_call`      |  50    | Arrival/departure recorded by port but AIS was off during transit.        |
+The six implemented detectors sum to `RUBRIC_MAX = 860`. The raw component total is normalized to 0–1000 in the response, leaving headroom for future detectors (SAR visual mismatch, dark port call, etc.) without rebalancing.
 
-Total max: 1000.
+| Detector | Weight | Trigger |
+|---|---|---|
+| `dark_activity` | 180 | AIS off > 4h. Severity scales with duration; doubled inside a known STS zone. |
+| `kinematic_anomaly` | 120 | Implied transit speed across an AIS gap exceeds 30 kn. |
+| `sts_proximity` | 150 | Open-water encounter > 30 min, no port call. Boosted by classified STS + known zone + oil cargo. |
+| `sanctions_match` | 200 | Direct OFAC SDN hit on vessel IMO, or sanctioned ancestor in owner chain. Shell-company owners contribute. |
+| `identity_inconsistency` | 110 | ≥ 2 flag changes in 12 months, switch to a flag of convenience, or missing MMSI. |
+| `route_plausibility` | 100 | Last-known position > 4000 nm from any recently-called port. |
 
 ## Output shape
 
 ```json
 {
   "vessel_imo": "9876543",
-  "score": 842,
+  "score": 819,
   "band": "critical",
+  "recommendation": "notify command",
   "computed_at": "2026-05-02T19:00:00Z",
   "components": [
-    {"name": "ais_gap", "weight": 150, "value": 1.0, "contribution": 150, "evidence": {...}},
-    {"name": "flag_hopping", "weight": 100, "value": 0.8, "contribution": 80, "evidence": {...}}
+    {
+      "name": "dark_activity",
+      "weight": 180,
+      "value": 1.0,
+      "contribution": 180,
+      "evidence_records": [{
+        "id": 12,
+        "detector_name": "dark_activity",
+        "title": "16.0h AIS dark period inside a known STS-transfer corridor",
+        "description": "...",
+        "source_type": "ais",
+        "source_ref": "aisgap://4",
+        "severity": "critical",
+        "confidence": 0.85,
+        "geometry": {"type": "LineString", "coordinates": [...]},
+        "...": "..."
+      }]
+    }
   ]
 }
 ```

@@ -7,7 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import get_settings
 from app.db import init_db
-from app.routers import briefs, network, satellite, scores, vessels
+from app.routers import briefs, evidence, network, satellite, scores, vessels
 
 
 @asynccontextmanager
@@ -38,6 +38,7 @@ def create_app() -> FastAPI:
     app.include_router(briefs.router)
     app.include_router(network.router)
     app.include_router(satellite.router)
+    app.include_router(evidence.router)
 
     @app.get("/health")
     def health() -> dict[str, str]:

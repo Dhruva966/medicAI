@@ -2,6 +2,7 @@
 // /api/* to http://localhost:8000 (see vite.config.ts).
 
 import type {
+  Evidence,
   InterdictionBriefOut,
   OwnershipNetwork,
   SAROverlay,
@@ -32,6 +33,7 @@ export const api = {
   listVessels: () => get<Vessel[]>("/vessels"),
   getVessel: (imo: string) => get<VesselDetail>(`/vessels/${imo}`),
   getScore: (imo: string) => get<Score>(`/vessels/${imo}/score`),
+  getEvidence: (imo: string) => get<Evidence[]>(`/vessels/${imo}/evidence`),
   getNetwork: (imo: string, depth = 2) =>
     get<OwnershipNetwork>(`/vessels/${imo}/network?depth=${depth}`),
   getSAR: (imo: string) => get<SAROverlay>(`/vessels/${imo}/sar`),

@@ -26,7 +26,11 @@ class FlagHistoryOut(BaseModel):
 
 
 class VesselOut(BaseModel):
-    """Lightweight vessel record for list views and the map."""
+    """Lightweight vessel record for list views and the map.
+
+    Score / band are populated from the latest RiskScore when available so
+    the map can color markers without a per-vessel round-trip.
+    """
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -37,6 +41,8 @@ class VesselOut(BaseModel):
     last_seen_lat: float | None = None
     last_seen_lon: float | None = None
     last_seen_at: datetime | None = None
+    score: int | None = None
+    band: str | None = None
 
 
 class VesselDetail(VesselOut):

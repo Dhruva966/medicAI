@@ -2,7 +2,7 @@
 
 from datetime import datetime
 
-from sqlalchemy import JSON, DateTime, Float, ForeignKey, Integer, String, func
+from sqlalchemy import DateTime, Float, ForeignKey, Integer, String, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db import Base
@@ -17,6 +17,7 @@ class RiskScore(Base):
     vessel_imo: Mapped[str] = mapped_column(ForeignKey("vessels.imo"), index=True)
     score: Mapped[int] = mapped_column(Integer)  # 0-1000
     band: Mapped[str] = mapped_column(String(16))  # low | medium | high | critical
+    recommendation: Mapped[str] = mapped_column(String(64))  # monitor | investigate | sanctions review | notify command
     computed_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
 
     components: Mapped[list["ScoreComponent"]] = relationship(
@@ -37,6 +38,8 @@ class ScoreComponent(Base):
     weight: Mapped[int] = mapped_column(Integer)
     value: Mapped[float] = mapped_column(Float)  # 0..1
     contribution: Mapped[int] = mapped_column(Integer)  # weight * value, rounded
-    evidence: Mapped[dict] = mapped_column(JSON, default=dict)
 
     score: Mapped["RiskScore"] = relationship("RiskScore", back_populates="components")
+    evidence_records: Mapped[list["Evidence"]] = relationship(  # noqa: F821
+        "Evidence", back_populates="score_component"
+    )
