@@ -1,0 +1,25 @@
+# MedicAI — top-level requirements (M3 MacBook inference machine)
+# Install: source mac/venv/bin/activate && pip install -r requirements.txt
+#
+# mac/requirements.txt covers mlx-vlm deps.
+# This file adds STT + TTS + networking deps on top.
+
+# --- already in mac/requirements.txt (duplicated for clarity) ---
+mlx>=0.18.0
+mlx-vlm>=0.1.0
+pillow
+huggingface_hub
+jsonschema
+requests
+
+# --- STT ---
+openai-whisper
+sounddevice
+scipy
+numpy
+
+# --- Vision (RTSP capture, optional) ---
+opencv-python
+
+# --- TTS ---
+piper-tts

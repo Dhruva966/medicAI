@@ -1,0 +1,254 @@
+[
+  {
+    "class_id": "II-Art-Thigh",
+    "name": "Class II Arterial Hemorrhage — Lower Extremity",
+    "triggers": ["gsw", "gunshot", "thigh", "femoral", "leg", "arterial", "left_leg", "right_leg"],
+    "wound_types": ["gunshot", "puncture"],
+    "bleeding_severities": ["arterial", "severe"],
+    "steps": [
+      "Apply tourniquet 2 to 3 inches above the wound, not over a joint.",
+      "Tighten until bleeding stops. Mark the time on the patient's forehead with a marker.",
+      "Elevate the limb above heart level if no suspected fracture.",
+      "Pack the wound with a hemostatic dressing if tourniquet cannot be placed.",
+      "Monitor distal pulse every 2 minutes. If lost, reassess tourniquet placement.",
+      "Keep patient warm. Hypothermia worsens coagulopathy."
+    ],
+    "cautions": {
+      "sickle_cell": "Sickle cell increases vaso-occlusive risk. Tourniquet ischemia time is more dangerous — reassess at 30 minutes. Monitor for vaso-occlusive crisis signs: severe bone pain, chest pain, priapism.",
+      "anticoagulants": "Expect prolonged bleeding time. Apply additional wound packing layers. Do not remove tourniquet in the field.",
+      "diabetes": "Impaired wound healing and neuropathy may mask pain. Do not use pain as a guide to tourniquet effectiveness. Check distal pulse directly.",
+      "hypertension": "High blood pressure may sustain arterial bleeding despite tourniquet. Ensure tourniquet is fully occlusive — no distal pulse is the goal."
+    }
+  },
+  {
+    "class_id": "II-Hem-Shoulder",
+    "name": "Class II Hemorrhage — Shoulder / Upper Extremity",
+    "triggers": ["shoulder", "arm", "shrapnel", "left_arm", "right_arm", "humerus", "axilla"],
+    "wound_types": ["laceration", "gunshot", "blast", "puncture"],
+    "bleeding_severities": ["moderate", "severe"],
+    "steps": [
+      "Apply direct pressure with a trauma dressing for 3 to 5 minutes.",
+      "Elevate the arm above heart level if possible.",
+      "If bleeding does not stop, apply a wound packing dressing with hemostatic gauze.",
+      "Secure the arm in a sling to reduce motion and rebleeding.",
+      "Monitor for signs of shock: tachycardia, pallor, altered consciousness.",
+      "For axillary wounds, use junctional tourniquet or axillary packing — standard tourniquet cannot be placed."
+    ],
+    "cautions": {
+      "sickle_cell": "Avoid prolonged cold packs — vasoconstriction can trigger vaso-occlusive crisis in the extremity.",
+      "anticoagulants": "Wound packing is especially important. Plan for prolonged pressure application (10+ minutes).",
+      "diabetes": "Peripheral neuropathy may reduce pain signals. Assess wound depth visually, not by pain response.",
+      "hypertension": "Persistent bleeding despite pressure may indicate arterial involvement. Escalate to junctional tourniquet early."
+    }
+  },
+  {
+    "class_id": "III-Chest-GSW",
+    "name": "Penetrating Chest Trauma — Tension Pneumothorax Risk",
+    "triggers": ["chest", "thorax", "lung", "rib", "pneumothorax", "sucking"],
+    "wound_types": ["gunshot", "puncture", "blast"],
+    "bleeding_severities": ["moderate", "severe", "arterial"],
+    "steps": [
+      "Seal the chest wound with a vented chest seal (two-sided if available). Do NOT use occlusive seal alone.",
+      "Sit the patient upright at 45 degrees if conscious and breathing.",
+      "Monitor for tension pneumothorax: absent breath sounds, tracheal deviation, worsening hypoxia, distended neck veins.",
+      "If tension pneumothorax suspected: needle decompression at second intercostal space, midclavicular line.",
+      "Do NOT remove objects impaled in the chest — stabilize in place.",
+      "Administer oxygen if available. Reassess every 5 minutes."
+    ],
+    "cautions": {
+      "sickle_cell": "Sickle cell increases risk of acute chest syndrome — respiratory symptoms can escalate rapidly. Prioritize oxygenation.",
+      "anticoagulants": "Hemothorax risk is elevated. Expect more internal bleeding even with minimal external wound.",
+      "asthma": "Bronchospasm may mimic or worsen tension pneumothorax. Administer bronchodilator if available before needle decompression.",
+      "hypertension": "Aortic injury is a higher-probability concern. Treat for hemothorax alongside pneumothorax."
+    }
+  },
+  {
+    "class_id": "II-Abdominal",
+    "name": "Abdominal Penetrating Wound — Evisceration",
+    "triggers": ["abdomen", "belly", "gut", "stomach", "evisceration", "bowel"],
+    "wound_types": ["gunshot", "puncture", "laceration", "blast"],
+    "bleeding_severities": ["moderate", "severe"],
+    "steps": [
+      "Do NOT push protruding organs back. Cover with a moist sterile dressing.",
+      "Apply gentle pressure around (not over) the wound to limit contamination.",
+      "Position patient supine with knees slightly bent to reduce abdominal tension.",
+      "Do NOT give oral fluids — surgery will be required.",
+      "Monitor for signs of hemorrhagic shock. Maintain airway.",
+      "Apply an abdominal binder loosely over the dressing to hold it in place during transport."
+    ],
+    "cautions": {
+      "sickle_cell": "Sickle cell patients have impaired wound healing and increased infection risk. Minimize contamination.",
+      "diabetes": "Higher infection and sepsis risk. Keep wound covered and clean.",
+      "anticoagulants": "Internal bleeding may be significant even with small entrance wounds. Treat for shock proactively.",
+      "pregnancy": "Position tilted 15 degrees left lateral to relieve aortocaval compression."
+    }
+  },
+  {
+    "class_id": "Amputation-Traumatic",
+    "name": "Traumatic Amputation — Partial or Complete",
+    "triggers": ["amputation", "amputated", "missing limb", "blast injury", "degloving"],
+    "wound_types": ["amputation", "blast", "avulsion"],
+    "bleeding_severities": ["arterial", "severe"],
+    "steps": [
+      "Apply tourniquet immediately, as high on the limb as possible.",
+      "Mark tourniquet application time on forehead. Do NOT remove in the field.",
+      "Cover the stump with a sterile or clean dressing.",
+      "If partial amputation: do NOT complete the amputation. Immobilize in position of comfort.",
+      "Preserve the amputated part if recoverable — wrap in moist sterile gauze, place in sealed bag, then in cool water. Do NOT put directly on ice.",
+      "Treat aggressively for hemorrhagic shock. Two large-bore IV access if possible."
+    ],
+    "cautions": {
+      "sickle_cell": "Ischemia from tourniquet is especially harmful. Document time precisely. Vasocclusive crisis can occur in the contralateral limb.",
+      "anticoagulants": "Despite tourniquet, oozing from wound edges will continue. Additional hemostatic dressings around the stump are essential.",
+      "diabetes": "Do not rely on pain to assess tourniquet effectiveness — neuropathy may blunt sensation.",
+      "hypothermia": "Patients in cold environments deteriorate faster. Cover patient aggressively."
+    }
+  },
+  {
+    "class_id": "Burns-Major",
+    "name": "Major Burns — Rule of Nines Assessment",
+    "triggers": ["burn", "fire", "flame", "thermal", "chemical", "phosphorus"],
+    "wound_types": ["burn", "other"],
+    "bleeding_severities": ["none", "minor"],
+    "steps": [
+      "Remove patient from heat source. Do NOT remove clothing stuck to burns.",
+      "Cool the burn with cool (not cold) water for 10 minutes if within first hour. Stop if patient becomes hypothermic.",
+      "Cover burns with a dry sterile dressing. Do NOT use wet dressings for large burns — hypothermia risk.",
+      "Start IV fluid resuscitation if available: Parkland formula — 4 mL per kg per % TBSA for first 24 hours.",
+      "Assess airway: if facial burns, singed nasal hairs, or hoarse voice — airway edema is imminent.",
+      "Do NOT break blisters. Do NOT apply ice, butter, or toothpaste."
+    ],
+    "cautions": {
+      "diabetes": "Burns in diabetic patients heal poorly and have very high infection risk. Aggressive wound coverage.",
+      "sickle_cell": "Fluid resuscitation may trigger acute chest syndrome. Monitor respiratory status closely.",
+      "anticoagulants": "Wound bed may ooze more than expected. Monitor hemoglobin.",
+      "inhalation_injury": "Priority: airway over wound. Early intubation if available."
+    }
+  },
+  {
+    "class_id": "TBI-Concussion",
+    "name": "Traumatic Brain Injury — Concussion to Severe",
+    "triggers": ["head", "skull", "brain", "concussion", "tbi", "helmet", "blast"],
+    "wound_types": ["blast", "crush", "laceration", "gunshot"],
+    "bleeding_severities": ["minor", "moderate", "severe"],
+    "steps": [
+      "Stabilize the cervical spine if mechanism suggests neck injury.",
+      "Assess GCS (eye, verbal, motor). GCS ≤ 8 = severe TBI — establish airway.",
+      "Apply pressure to scalp lacerations — scalp bleeds heavily.",
+      "Position head at 30 degrees elevation if no spinal injury suspected.",
+      "Do NOT administer opioids or sedatives — masks neurological status.",
+      "Monitor every 5 minutes for deteriorating consciousness, unequal pupils, vomiting."
+    ],
+    "cautions": {
+      "anticoagulants": "Intracranial hemorrhage risk is dramatically elevated. Any TBI in anticoagulated patient is high priority for evacuation.",
+      "diabetes": "Hypoglycemia can mimic TBI. Check blood glucose if available.",
+      "hypertension": "Maintain systolic BP > 90 mmHg to preserve cerebral perfusion pressure.",
+      "sickle_cell": "Sickle cell increases stroke risk — TBI can trigger ischemic or hemorrhagic stroke in addition to direct trauma."
+    }
+  },
+  {
+    "class_id": "Tension-Pneumo",
+    "name": "Tension Pneumothorax — Needle Decompression",
+    "triggers": ["tension", "pneumothorax", "no breath sounds", "tracheal deviation", "distended neck"],
+    "wound_types": ["gunshot", "blast", "puncture"],
+    "bleeding_severities": ["minor", "moderate"],
+    "steps": [
+      "Identify: absent unilateral breath sounds, tracheal deviation away from affected side, distended neck veins, hypoxia, hypotension.",
+      "Needle decompression: 14-gauge angiocath at second intercostal space, midclavicular line, superior margin of the rib.",
+      "Advance needle until air rush is heard. Leave the catheter in place.",
+      "If vented chest seal present and applied, burp the valve to release pressure.",
+      "Reassess breath sounds. If no improvement, consider bilateral tension — decompress opposite side.",
+      "Place patient in position of comfort. Reassess every 5 minutes."
+    ],
+    "cautions": {
+      "asthma": "COPD/asthma can mimic tension pneumothorax. Administer bronchodilator first if tension signs are equivocal.",
+      "sickle_cell": "Acute chest syndrome can present similarly. If no improvement after needle decompression, consider acute chest syndrome.",
+      "anticoagulants": "Hemothorax may accompany pneumothorax — needle decompression risks hemothorax drainage into pleural space.",
+      "obesity": "Deeper chest wall may require longer needle (3.25 inch). Standard 14g may not reach pleural space."
+    }
+  },
+  {
+    "class_id": "Hemorrhagic-Shock",
+    "name": "Hemorrhagic Shock — Class III/IV",
+    "triggers": ["shock", "hypotension", "pale", "cyanotic", "unconscious", "no pulse"],
+    "wound_types": ["gunshot", "blast", "laceration", "amputation"],
+    "bleeding_severities": ["arterial", "severe"],
+    "steps": [
+      "Control all visible bleeding immediately with tourniquets, pressure, and wound packing.",
+      "Lay patient flat. Elevate legs if no spinal injury suspected.",
+      "Establish IV access — two large-bore peripheral IVs if possible.",
+      "If available: transfuse packed red blood cells and plasma in 1:1 ratio. Do NOT infuse large volumes of crystalloid alone.",
+      "Keep patient warm — hypothermia worsens coagulopathy and mortality.",
+      "Reassess every 2 minutes. GCS, radial pulse, skin color."
+    ],
+    "cautions": {
+      "sickle_cell": "Sickle cell causes microvascular occlusion under hypoxia and hypotension — shock is rapidly life-threatening. Prioritize oxygenation alongside hemorrhage control.",
+      "anticoagulants": "Coagulopathy is baseline — patient bleeds faster and clots less. Tranexamic acid (TXA) if available is critical.",
+      "diabetes": "Autonomic neuropathy may blunt tachycardia as a shock marker. Rely on blood pressure and skin color instead.",
+      "pregnancy": "Pregnant patients can lose 30-40% of blood volume before showing hypotension. Maintain left lateral tilt."
+    }
+  },
+  {
+    "class_id": "Airway-Obstruction",
+    "name": "Airway Obstruction — Foreign Body or Swelling",
+    "triggers": ["airway", "choking", "stridor", "snoring", "gurgling", "cyanotic", "unconscious"],
+    "wound_types": ["blast", "crush", "burn", "other"],
+    "bleeding_severities": ["none", "minor"],
+    "steps": [
+      "Position patient: chin lift / jaw thrust to open airway.",
+      "Inspect oral cavity for visible obstruction. Remove with finger sweep only if clearly visible.",
+      "Insert nasopharyngeal airway (NPA) if available and no head trauma.",
+      "If obstruction persists and unconscious: attempt bag-valve-mask ventilation.",
+      "If complete obstruction and unable to ventilate: surgical airway (cricothyrotomy) if trained.",
+      "Recovery position if breathing returns and no spinal injury suspected."
+    ],
+    "cautions": {
+      "burns": "Facial or inhalation burns cause rapid progressive airway edema. Act immediately — delay of minutes can make intubation impossible.",
+      "sickle_cell": "Hypoxia from airway obstruction will trigger sickle cell crisis. Priority is oxygenation.",
+      "trauma": "Assume cervical spine injury in all high-mechanism airway patients. Use jaw thrust, not head-tilt.",
+      "anticoagulants": "Airway instrumentation may cause significant oropharyngeal bleeding. Suction must be available."
+    }
+  },
+  {
+    "class_id": "Fracture-Long-Bone",
+    "name": "Long Bone Fracture — Femur / Tibia / Humerus",
+    "triggers": ["fracture", "broken bone", "femur", "tibia", "humerus", "deformity", "angulated"],
+    "wound_types": ["crush", "blast", "other"],
+    "bleeding_severities": ["none", "minor", "moderate"],
+    "steps": [
+      "Immobilize the fracture in the position found. Do not attempt to straighten angulated fractures.",
+      "For open fractures: cover bone/wound with sterile dressing. Do NOT push bone back in.",
+      "For femur fractures: apply traction splint if available — femur fracture can cause 1-2L internal blood loss.",
+      "Check and document neurovascular status (sensation, pulse, capillary refill) before and after splinting.",
+      "Pad all bony prominences under the splint.",
+      "Elevate the extremity above heart level to reduce swelling."
+    ],
+    "cautions": {
+      "anticoagulants": "Compartment syndrome and internal hemorrhage risk are elevated. Monitor for compartment syndrome signs: pain out of proportion, pallor, pulselessness, paresthesia, paralysis.",
+      "diabetes": "Peripheral neuropathy can mask compartment syndrome. Monitor compartment pressure directly if possible.",
+      "osteoporosis": "Fracture pattern may be more comminuted than expected. Immobilize a larger segment.",
+      "sickle_cell": "Bone infarct is common in sickle cell and may mimic fracture. Bone pain + swelling without trauma = possible vaso-occlusive crisis, not fracture."
+    }
+  },
+  {
+    "class_id": "Anaphylaxis",
+    "name": "Anaphylaxis — Severe Allergic Reaction",
+    "triggers": ["anaphylaxis", "allergic", "bee sting", "hives", "rash", "swelling", "epinephrine"],
+    "wound_types": ["other", "none"],
+    "bleeding_severities": ["none"],
+    "steps": [
+      "Administer epinephrine 0.3mg IM (EpiPen or auto-injector) to the outer thigh immediately.",
+      "Call for MEDEVAC — epinephrine is temporizing, not curative.",
+      "Position: supine with legs elevated unless respiratory distress, then sitting upright.",
+      "If wheezing: administer bronchodilator (albuterol) if available.",
+      "Monitor for biphasic reaction — symptoms can recur 1-8 hours after initial response.",
+      "Repeat epinephrine every 5-15 minutes if no improvement. Max 3 doses."
+    ],
+    "cautions": {
+      "hypertension": "Epinephrine will elevate blood pressure further. No dose reduction in anaphylaxis — epinephrine is life-saving. Administer standard dose.",
+      "heart_disease": "Cardiac arrhythmia risk with epinephrine. Administer IM, not IV, to reduce peak concentration.",
+      "diabetes": "Epinephrine causes hyperglycemia. Treat anaphylaxis first; manage glucose secondarily.",
+      "sickle_cell": "Epinephrine-induced vasoconstriction can precipitate vaso-occlusive crisis. No dose modification — anaphylaxis is immediately life-threatening."
+    }
+  }
+]

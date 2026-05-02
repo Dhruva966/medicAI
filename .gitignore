@@ -1,0 +1,44 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.egg-info/
+.eggs/
+dist/
+build/
+
+# Virtual environment
+mac/venv/
+venv/
+.venv/
+
+# Auto-generated
+mac/model_names.json
+mac/test_images/
+
+# Demo assets (binary files — add manually)
+assets/gsw_demo.jpg
+assets/*.jpg
+assets/*.png
+assets/*.jpeg
+
+# Ollama model cache (managed by Ollama, not git)
+.ollama/
+
+# macOS
+.DS_Store
+**/.DS_Store
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Temp files
+*.tmp
+/tmp/
+
+# Piper voice models (large binary)
+*.onnx
+*.onnx.json
