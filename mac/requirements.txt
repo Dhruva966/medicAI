@@ -1,0 +1,6 @@
+mlx>=0.18.0
+mlx-vlm>=0.1.0
+pillow
+huggingface_hub
+jsonschema
+requests

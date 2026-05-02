@@ -1,0 +1,71 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "TriageVisionOutput",
+  "type": "object",
+  "required": [
+    "location",
+    "wound_type",
+    "bleeding_severity",
+    "foreign_objects",
+    "exposed_structures",
+    "skin_color",
+    "tourniquet",
+    "confidence",
+    "notes"
+  ],
+  "properties": {
+    "location": {
+      "type": "object",
+      "required": ["region", "detail"],
+      "properties": {
+        "region": {
+          "type": "string",
+          "enum": [
+            "head", "neck", "chest", "abdomen", "back",
+            "left_arm", "right_arm", "left_leg", "right_leg",
+            "left_hand", "right_hand", "left_foot", "right_foot",
+            "groin", "multiple", "unclear"
+          ]
+        },
+        "detail": { "type": "string" }
+      }
+    },
+    "wound_type": {
+      "type": "string",
+      "enum": [
+        "laceration", "puncture", "abrasion", "burn", "amputation",
+        "gunshot", "blast", "crush", "avulsion", "other", "unclear", "none"
+      ]
+    },
+    "bleeding_severity": {
+      "type": "string",
+      "enum": ["none", "minor", "moderate", "severe", "arterial"]
+    },
+    "foreign_objects": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "exposed_structures": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "skin_color": {
+      "type": "string",
+      "enum": ["pale", "normal", "cyanotic", "flushed", "unclear"]
+    },
+    "tourniquet": {
+      "type": "object",
+      "required": ["present", "position", "appears_correct"],
+      "properties": {
+        "present": { "type": "boolean" },
+        "position": { "type": ["string", "null"] },
+        "appears_correct": { "type": ["boolean", "null"] }
+      }
+    },
+    "confidence": {
+      "type": "string",
+      "enum": ["low", "medium", "high"]
+    },
+    "notes": { "type": "string" }
+  }
+}
