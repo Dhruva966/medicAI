@@ -1,0 +1,7 @@
+venv/
+data/
+saved_models/
+monitor/snapshot.json
+monitor/canaries.pkl
+__pycache__/
+*.pyc

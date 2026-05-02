@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SENTINEL — AI Model Integrity Monitor</title>
+  <style>
+    /* Reset */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    /* Base */
+    body {
+      background: #0a0f0a;
+      color: #c8d8c8;
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 13px;
+      line-height: 1.5;
+      padding: 20px 24px;
+      min-height: 100vh;
+    }
+
+    /* Header */
+    .header {
+      display: flex;
+      align-items: baseline;
+      gap: 20px;
+      border-bottom: 1px solid #1a2f1a;
+      padding-bottom: 14px;
+      margin-bottom: 24px;
+    }
+    .header h1 { font-size: 22px; color: #4ade80; letter-spacing: 0.2em; }
+    .header .sub { color: #4a5a4a; font-size: 11px; }
+    .header .clock { margin-left: auto; color: #2a4a2a; font-size: 12px; }
+
+    /* Grid */
+    .grid {
+      display: grid;
+      grid-template-columns: 260px 1fr;
+      gap: 18px;
+      align-items: start;
+    }
+
+    /* Panels */
+    .panel {
+      background: #0d130d;
+      border: 1px solid #1a2f1a;
+      border-radius: 3px;
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+    .panel:last-child { margin-bottom: 0; }
+    .panel-title {
+      font-size: 10px;
+      color: #3a5a3a;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      margin-bottom: 14px;
+    }
+
+    /* Buttons */
+    button {
+      display: block;
+      width: 100%;
+      padding: 9px 12px;
+      border-radius: 2px;
+      font-family: 'Courier New', monospace;
+      font-size: 11px;
+      letter-spacing: 0.06em;
+      cursor: pointer;
+      border: 1px solid;
+      margin-bottom: 8px;
+      transition: filter 0.15s;
+    }
+    button:last-child { margin-bottom: 0; }
+    button:hover { filter: brightness(1.15); }
+    button:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    .btn-deploy   { background: #0c1f3a; border-color: #1e4a8a; color: #5b9cf6; }
+    .btn-check    { background: #141414; border-color: #2a2a2a; color: #8a8a8a; }
+    .btn-attack   { background: #2a0808; border-color: #6a1010; color: #f87171; }
+    .btn-auto-off { background: #0d170d; border-color: #1a3a1a; color: #3a6a3a; }
+    .btn-auto-on  { background: #0d1f0d; border-color: #4ade80; color: #4ade80; }
+
+    /* Stat grid */
+    .stat-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+    .stat-box {
+      background: #0f1a0f;
+      border: 1px solid #1a2a1a;
+      border-radius: 2px;
+      padding: 8px 10px;
+    }
+    .stat-label { font-size: 9px; color: #3a5a3a; margin-bottom: 3px; letter-spacing: 0.1em; }
+    .stat-value { font-size: 14px; color: #4ade80; }
+    .stat-value.danger { color: #f87171; }
+
+    /* Status badge */
+    .status-badge {
+      border-radius: 3px;
+      padding: 14px 10px;
+      text-align: center;
+      transition: all 0.3s;
+    }
+    .badge-CLEAN       { background: #041504; border: 1px solid #1a5a1a; }
+    .badge-SUSPICIOUS  { background: #241200; border: 1px solid #7a4500; }
+    .badge-COMPROMISED { background: #200404; border: 1px solid #7a1010; }
+    .badge-UNKNOWN     { background: #111111; border: 1px solid #2a2a2a; }
+
+    .badge-text { font-size: 20px; font-weight: bold; letter-spacing: 0.1em; }
+    .text-CLEAN       { color: #4ade80; }
+    .text-SUSPICIOUS  { color: #fb923c; }
+    .text-COMPROMISED { color: #f87171; }
+    .text-UNKNOWN     { color: #4a4a4a; }
+    .badge-time { font-size: 10px; color: #3a5a3a; margin-top: 5px; }
+
+    /* Check cards */
+    .check-card {
+      border-radius: 2px;
+      padding: 12px;
+      margin-bottom: 10px;
+      transition: all 0.3s;
+    }
+    .check-card:last-child { margin-bottom: 0; }
+    .card-pass { background: #041504; border: 1px solid #1a4a1a; }
+    .card-fail { background: #1c0404; border: 1px solid #5a1010; }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+    .card-name   { font-size: 10px; color: #6a8a6a; letter-spacing: 0.12em; }
+    .card-detail { font-size: 11px; color: #6a8a6a; }
+
+    .badge-pass, .badge-fail {
+      font-size: 10px;
+      font-weight: bold;
+      padding: 2px 8px;
+      border-radius: 2px;
+    }
+    .badge-pass { background: #1a4a1a; color: #4ade80; }
+    .badge-fail { background: #4a1010; color: #f87171; }
+
+    /* Divergence bar */
+    .bar-wrap  { margin-top: 8px; }
+    .bar-label { font-size: 10px; color: #3a5a3a; margin-bottom: 4px; }
+    .bar-track { background: #0f1a0f; border-radius: 2px; height: 5px; }
+    .bar-fill  { height: 5px; border-radius: 2px; transition: width 0.5s; }
+    .bar-green { background: #4ade80; }
+    .bar-red   { background: #f87171; }
+
+    /* Flip table */
+    .flip-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+      font-size: 11px;
+    }
+    .flip-table th {
+      text-align: left;
+      color: #3a5a3a;
+      padding: 3px 6px;
+      border-bottom: 1px solid #1a2a1a;
+      font-weight: normal;
+      letter-spacing: 0.05em;
+    }
+    .flip-table td { padding: 3px 6px; color: #7a8a7a; }
+    .flip-yes { color: #f87171 !important; font-weight: bold; }
+    .flip-no  { color: #4ade80 !important; }
+
+    /* History */
+    .history-dots {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      min-height: 26px;
+    }
+    .dot {
+      width: 24px;
+      height: 24px;
+      border-radius: 2px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      cursor: default;
+      font-weight: bold;
+    }
+    .dot-OK       { background: #1a4a1a; color: #4ade80; }
+    .dot-HIGH     { background: #4a2500; color: #fb923c; }
+    .dot-CRITICAL { background: #4a0a0a; color: #f87171; }
+
+    /* Empty state */
+    .empty { color: #2a4a2a; text-align: center; padding: 20px; font-size: 12px; }
+
+    /* Scrollable check area */
+    #checksContainer { min-height: 80px; }
+  </style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="header">
+  <h1>◈ SENTINEL</h1>
+  <span class="sub">AI Model Integrity Monitor — Tactical Edge Deployment</span>
+  <span class="clock" id="clock"></span>
+</div>
+
+<!-- Main Grid -->
+<div class="grid">
+
+  <!-- LEFT COLUMN -->
+  <div>
+
+    <!-- Controls -->
+    <div class="panel">
+      <div class="panel-title">Deployment Control</div>
+      <button class="btn-deploy" id="btnDeploy" onclick="deploy('clean')">
+        ▶ DEPLOY CLEAN MODEL
+      </button>
+      <button class="btn-check" id="btnCheck" onclick="runCheck()" disabled>
+        ◈ RUN INTEGRITY CHECK
+      </button>
+      <button class="btn-attack" id="btnAttack" onclick="simulateAttack()" disabled>
+        ⚠ SIMULATE ATTACK
+      </button>
+      <button class="btn-auto-off" id="btnAuto" onclick="toggleAuto()" disabled>
+        ○ AUTO MONITOR (15s)
+      </button>
+    </div>
+
+    <!-- Stats -->
+    <div class="panel">
+      <div class="panel-title">System Status</div>
+      <div class="stat-grid">
+        <div class="stat-box">
+          <div class="stat-label">ACTIVE MODEL</div>
+          <div class="stat-value" id="statModel">—</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">TOTAL CHECKS</div>
+          <div class="stat-value" id="statChecks">0</div>
+        </div>
+      </div>
+
+      <div class="status-badge badge-UNKNOWN" id="statusBadge">
+        <div class="badge-text text-UNKNOWN" id="statusText">AWAITING DEPLOYMENT</div>
+        <div class="badge-time" id="statusTime">—</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- RIGHT COLUMN -->
+  <div>
+
+    <!-- Check Results -->
+    <div class="panel">
+      <div class="panel-title">Integrity Checks — Latest Result</div>
+      <div id="checksContainer">
+        <div class="empty">Deploy a model and run a check to see results.</div>
+      </div>
+    </div>
+
+    <!-- History -->
+    <div class="panel">
+      <div class="panel-title">Check History</div>
+      <div class="history-dots" id="historyDots">
+        <span style="color:#2a4a2a; font-size:11px;">No checks run yet.</span>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// ── State ──────────────────────────────────────────────────────
+let isDeployed = false;
+let autoTimer  = null;
+let isAutoOn   = false;
+
+// ── Clock ──────────────────────────────────────────────────────
+function updateClock() {
+  document.getElementById('clock').textContent =
+    new Date().toLocaleTimeString('en-US', { hour12: false });
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+// ── API helpers ────────────────────────────────────────────────
+async function post(path, body = {}) {
+  const r = await fetch(path, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+  return r.json();
+}
+
+async function get(path) {
+  const r = await fetch(path);
+  return r.json();
+}
+
+// ── Actions ────────────────────────────────────────────────────
+async function deploy(modelKey) {
+  setButtonsDisabled(true);
+  const data = await post('/api/deploy', { model: modelKey });
+  if (data.error) { alert('Error: ' + data.error); setButtonsDisabled(false); return; }
+  isDeployed = true;
+  enableButtons();
+  await runCheck();
+}
+
+async function runCheck() {
+  const data = await post('/api/check');
+  if (data.error) { alert('Error: ' + data.error); return; }
+  renderCheckResult(data);
+  await refreshHistory();
+  await refreshState();
+}
+
+async function simulateAttack() {
+  const data = await post('/api/simulate_attack');
+  if (data.error) { alert('Error: ' + data.error); return; }
+  // Auto-check after brief delay so the model switch registers
+  setTimeout(runCheck, 400);
+}
+
+function toggleAuto() {
+  isAutoOn = !isAutoOn;
+  const btn = document.getElementById('btnAuto');
+  if (isAutoOn) {
+    btn.textContent = '⬤ AUTO MONITOR ON (15s)';
+    btn.className   = 'btn-auto-on';
+    autoTimer = setInterval(runCheck, 15000);
+  } else {
+    btn.textContent = '○ AUTO MONITOR (15s)';
+    btn.className   = 'btn-auto-off';
+    clearInterval(autoTimer);
+  }
+}
+
+// ── Render check result ────────────────────────────────────────
+function renderCheckResult(data) {
+  const ts = new Date(data.timestamp).toLocaleTimeString('en-US', { hour12: false });
+  updateStatusBadge(data.overall_status, data.severity, ts);
+
+  const checks = data.checks;
+  const html   = Object.entries(checks).map(([name, c]) => {
+    const cardCls  = c.passed ? 'check-card card-pass' : 'check-card card-fail';
+    const bdgCls   = c.passed ? 'badge-pass' : 'badge-fail';
+    const label    = name.replace(/_/g, ' ').toUpperCase();
+    const badgeTxt = c.passed ? 'PASS' : 'FAIL';
+
+    let extra = '';
+
+    if (c.divergence !== undefined) {
+      const pct    = Math.min(100, (c.divergence / 0.3) * 100).toFixed(1);
+      const barCls = c.passed ? 'bar-green' : 'bar-red';
+      extra += `
+        <div class="bar-wrap">
+          <div class="bar-label">
+            KL divergence: <strong>${c.divergence.toFixed(6)}</strong>
+            / threshold: ${c.threshold}
+          </div>
+          <div class="bar-track">
+            <div class="bar-fill ${barCls}" style="width:${pct}%"></div>
+          </div>
+        </div>`;
+    }
+
+    if (c.flips && c.flips.length) {
+      const rows = c.flips.map(f => `
+        <tr>
+          <td>#${f.canary_idx}</td>
+          <td>${f.baseline_class}</td>
+          <td>${f.current_class}</td>
+          <td class="${f.flipped ? 'flip-yes' : 'flip-no'}">
+            ${f.flipped ? '⚠ FLIPPED' : '✓ stable'}
+          </td>
+        </tr>`).join('');
+      extra += `
+        <table class="flip-table">
+          <tr><th>CANARY</th><th>EXPECTED</th><th>GOT</th><th>STATUS</th></tr>
+          ${rows}
+        </table>`;
+    }
+
+    return `
+      <div class="${cardCls}">
+        <div class="card-header">
+          <span class="card-name">${label}</span>
+          <span class="${bdgCls}">${badgeTxt}</span>
+        </div>
+        <div class="card-detail">${c.detail}</div>
+        ${extra}
+      </div>`;
+  }).join('');
+
+  document.getElementById('checksContainer').innerHTML = html;
+}
+
+function updateStatusBadge(status, severity, ts) {
+  const badge = document.getElementById('statusBadge');
+  const text  = document.getElementById('statusText');
+  const time  = document.getElementById('statusTime');
+
+  const cls = ['CLEAN','SUSPICIOUS','COMPROMISED'].includes(status) ? status : 'UNKNOWN';
+  badge.className = `status-badge badge-${cls}`;
+  text.className  = `badge-text text-${cls}`;
+  text.textContent = status;
+  if (ts) time.textContent = 'Last check: ' + ts;
+}
+
+async function refreshHistory() {
+  const data = await get('/api/history');
+  const dots = document.getElementById('historyDots');
+  if (!data.history || !data.history.length) return;
+  dots.innerHTML = data.history.map(h => {
+    const cls = 'dot-' + (h.severity || 'OK');
+    const sym = h.severity === 'CRITICAL' ? '!' :
+                h.severity === 'HIGH'     ? '?' : '✓';
+    const ts  = new Date(h.timestamp).toLocaleTimeString('en-US', { hour12: false });
+    return `<div class="dot ${cls}" title="${ts} — ${h.overall_status}">${sym}</div>`;
+  }).join('');
+}
+
+async function refreshState() {
+  const d = await get('/api/state');
+  const modelEl = document.getElementById('statModel');
+  modelEl.textContent = d.active_model ? d.active_model.toUpperCase() : '—';
+  modelEl.className   = 'stat-value' + (d.attack_active ? ' danger' : '');
+  document.getElementById('statChecks').textContent = d.total_checks || 0;
+}
+
+// ── Button state ───────────────────────────────────────────────
+function setButtonsDisabled(disabled) {
+  ['btnCheck','btnAttack','btnAuto'].forEach(id => {
+    document.getElementById(id).disabled = disabled;
+  });
+}
+
+function enableButtons() {
+  document.getElementById('btnCheck').disabled  = false;
+  document.getElementById('btnAttack').disabled = false;
+  document.getElementById('btnAuto').disabled   = false;
+}
+
+// ── Init ───────────────────────────────────────────────────────
+refreshState();
+</script>
+</body>
+</html>
