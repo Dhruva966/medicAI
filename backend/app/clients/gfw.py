@@ -18,6 +18,16 @@ from app.config import get_settings
 BASE_URL = "https://gateway.api.globalfishingwatch.org/v3"
 
 
+def status() -> dict[str, Any]:
+    s = get_settings()
+    return {
+        "configured": bool(s.gfw_token),
+        "mode": "live" if s.gfw_token else "mock",
+        "note": "Token present but search/track/encounters calls are stubs."
+        if s.gfw_token else "Set GFW_TOKEN to enable.",
+    }
+
+
 def _client() -> httpx.Client | None:
     token = get_settings().gfw_token
     if not token:

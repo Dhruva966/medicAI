@@ -14,7 +14,17 @@ from typing import Any
 
 from sqlalchemy.orm import Session
 
+from app.config import get_settings
 from app.models import AISGap
+
+
+def status() -> dict[str, Any]:
+    s = get_settings()
+    return {
+        "configured": bool(s.copernicus_client_id and s.copernicus_client_secret),
+        "mode": "mock",
+        "note": "OAuth + Sentinel-1 GRD fetch not wired; returns curated overlay.",
+    }
 
 
 def get_oauth_token() -> str:

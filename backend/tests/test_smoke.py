@@ -9,7 +9,13 @@ def test_health() -> None:
     client = TestClient(app)
     resp = client.get("/health")
     assert resp.status_code == 200
-    assert resp.json() == {"status": "ok"}
+    body = resp.json()
+    assert body["status"] == "ok"
+    assert "live_data_mode" in body
+    # Each client surface reports its mode for the dashboard / pitch demo.
+    for client_name in ("ofac", "aisstream", "gfw", "copernicus", "equasis"):
+        assert client_name in body["clients"]
+        assert "mode" in body["clients"][client_name]
 
 
 def test_openapi_lists_routers() -> None:

@@ -16,6 +16,14 @@ from sqlalchemy.orm import Session
 from app.models import FlagHistory, Owner, Vessel
 
 
+def status() -> dict[str, Any]:
+    return {
+        "configured": False,
+        "mode": "manual",
+        "note": "No public API. Owner/flag data sourced from local DB rows.",
+    }
+
+
 def get_owner_chain(db: Session, imo: str) -> list[dict[str, Any]]:
     """Return the ownership chain for a vessel, root → leaf."""
     vessel = db.query(Vessel).filter(Vessel.imo == imo).first()
